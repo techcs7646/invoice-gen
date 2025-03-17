@@ -84,10 +84,85 @@ const InvoiceForm = () => {
 
   const generatePDF = () => {
     const doc = new jsPDF();
+    
+    
+    let y = 20;
+    
+    
+    doc.setFontSize(20);
     doc.setFont("helvetica", "bold");
-    doc.text(languageOptions[language].invoice, 10, 10);
+    doc.text(languageOptions[language].invoice, 105, y, { align: "center" });
+    
+    
+    if (logo) {
+      doc.addImage(logo, 'JPEG', 20, y, 40, 40);
+    }
+    
+    y += 50;
+    
+   
+    doc.setFontSize(10);
+    doc.text(`Invoice Date: ${invoiceDate}`, 20, y);
+    doc.text(`Due Date: ${dueDate}`, 20, y + 7);
+    
+    y += 20;
+    
+    
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text(languageOptions[language].companyInfo, 20, y);
+    doc.text(languageOptions[language].recipient, 120, y);
+    
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(companyInfo.details.split('\n'), 20, y + 10);
+    doc.text(clientInfo.details.split('\n'), 120, y + 10);
+    
+    y += 50;
+    
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    
+    
+    const headers = ["Description", "Quantity", "Rate", "Amount"];
+    const columnWidth = [80, 30, 30, 30];
+    let xPosition = 20;
+    
+    headers.forEach((header, i) => {
+      doc.text(header, xPosition, y);
+      xPosition += columnWidth[i];
+    });
+    
+    y += 10;
+    doc.setFont("helvetica", "normal");
+    
+   
+    items.forEach((item) => {
+      xPosition = 20;
+      doc.text(item.description, xPosition, y);
+      doc.text(item.quantity.toString(), xPosition + columnWidth[0], y);
+      doc.text(item.rate.toString(), xPosition + columnWidth[0] + columnWidth[1], y);
+      doc.text((item.quantity * item.rate).toFixed(2), xPosition + columnWidth[0] + columnWidth[1] + columnWidth[2], y);
+      y += 7;
+    });
+    
+    y += 10;
+    
+   
+    doc.setFont("helvetica", "bold");
+    doc.text(`${languageOptions[language].subtotal}: ${currency} ${subtotal.toFixed(2)}`, 140, y);
+    y += 7;
+    doc.text(`${languageOptions[language].tax} (${tax}%): ${currency} ${taxAmount.toFixed(2)}`, 140, y);
+    y += 7;
+    doc.text(`${languageOptions[language].discount}: ${currency} ${discountAmount.toFixed(2)}`, 140, y);
+    y += 7;
+    doc.setFontSize(12);
+    doc.text(`${languageOptions[language].total}: ${currency} ${total.toFixed(2)}`, 140, y);
+    
+   
     doc.save("invoice.pdf");
-  };
+};
 
   const saveInvoice = () => {
     const newInvoice = {
@@ -120,7 +195,7 @@ const InvoiceForm = () => {
 
   return (
     <div className="bg-white shadow-md rounded-md p-6">
-      {/* Header Section */}
+     
       <div className="flex justify-between mb-4">
         <div className="w-1/3">
           <label className="block text-sm font-medium mb-2">Upload Logo:</label>
@@ -152,7 +227,7 @@ const InvoiceForm = () => {
         </div>
       </div>
   
-      {/* Company and Client Info */}
+     
       <div className="grid grid-cols-2 gap-6 mb-6">
         <div>
           <h3 className="text-lg font-bold">{languageOptions[language].companyInfo}</h3>
@@ -174,7 +249,7 @@ const InvoiceForm = () => {
         </div>
       </div>
   
-      {/* Currency and Language Selection */}
+     
       <div className="flex justify-between mb-6">
         <div>
           <label className="block mb-2 font-bold">Currency:</label>
@@ -201,7 +276,7 @@ const InvoiceForm = () => {
         </div>
       </div>
   
-      {/* Items Table */}
+      
       <div className="mb-6">
         <table className="w-full border-collapse border border-gray-200">
           <thead>
@@ -261,7 +336,7 @@ const InvoiceForm = () => {
         </button>
       </div>
   
-      {/* Discount and Totals */}
+      
       <div className="grid grid-cols-2 gap-6 mb-6">
         <div>
           <h3 className="font-bold">{languageOptions[language].discount}:</h3>
@@ -291,7 +366,7 @@ const InvoiceForm = () => {
         <p className="font-bold">{languageOptions[language].total}: {total.toFixed(2)}</p>
       </div>
   
-      {/* Action Buttons */}
+      
       <div className="flex justify-between mt-6">
         <button
           onClick={saveInvoice}
